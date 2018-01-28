@@ -60,6 +60,10 @@ export class ServiceBus {
         return new AutobahnEndpoint( root, this );
     }
 
+    service( root, Record ){
+        return new AutobahnService( root, Record, this );
+    }
+
     constructor( options = {} ){
         const url = document.location.origin == "file://" ? 
             "ws://127.0.0.1:80/ws" :
@@ -91,5 +95,55 @@ export class ServiceBus {
 
     onClose( reason, details ){
         console.warn( `[WAMP] Connection closed`, reason, details );
+    }
+}
+
+export class AutobahnService extends Messenger {
+    constructor( protected root, protected Record, protected bus ){
+        this.events = {
+            removed : id => this.publish( 'removed', id ),
+            updated : json => this.publish( 'updted', json )
+        }
+    }
+
+    publish( topic, ...args ){
+        this.bus.session.publish( this.root + '.' + topic, args );
+    }
+
+    connect(){
+        this.Record.prototype.endpoint.subscribe( this.events );
+
+        return this.bus.session.register( this.root, this.handleCall.bind( this ), { match: 'prefix' });
+    }
+
+    protected handleCall( args, kwargs, details ){
+        let name : string; //TODO: extract procedure name;
+
+        return this[ name ].apply( this, args );
+    }
+
+    list( options ){
+        const collection = new this.Record.Collection();
+        return collection.fetch( options ).then( () => collection.toJOSON() );
+    }
+
+    update( id, json, options ){
+        const record = new this.Record( json );
+        return record.save( options ).then( () => {} );
+    }
+
+    create( json, options ){
+        const record = new this.Record( json );
+        return record.save( options ).then( () => { id : record.id } );
+    }
+
+    read( id, options ){
+        const record = new this.Record({ id });
+        return record.fetch( options ).then( () => record.toJSON() );
+    }
+
+    destroy( id, options ){
+        const record = new this.Record({ id });
+        return record.destroy( options ).then( () => {} );
     }
 }
