@@ -1,0 +1,22 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vlad Balin",
+  "license": "MIT",
+  "devDependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-mvx": "^2.0.4",
+    "type-r": "^2.0.7",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0",
+    "autobahn": "^17.5.2"
+  },
+  "dependencies": {
+  }
+}
